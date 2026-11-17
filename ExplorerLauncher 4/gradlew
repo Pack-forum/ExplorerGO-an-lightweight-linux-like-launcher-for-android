@@ -1,0 +1,18 @@
+#!/bin/sh
+# Explorer GO - hafif gradlew: Gradle 8.4'ü indirip çalıştırır (wrapper jar gerekmez).
+set -e
+V=8.4
+# GitHub runner'larında JDK 17 hazır gelir; AGP 8 için JDK 17 şart.
+if [ -n "$JAVA_HOME_17_X64" ]; then export JAVA_HOME="$JAVA_HOME_17_X64"; fi
+BASE="${GRADLE_USER_HOME:-$HOME/.gradle}/explorer-dist"
+D="$BASE/gradle-$V"
+if [ ! -x "$D/bin/gradle" ]; then
+  mkdir -p "$BASE"
+  T="$(mktemp -d)"
+  URL="https://services.gradle.org/distributions/gradle-$V-bin.zip"
+  echo "Gradle $V indiriliyor..."
+  if command -v curl >/dev/null 2>&1; then curl -fsSL "$URL" -o "$T/g.zip"; else wget -q "$URL" -O "$T/g.zip"; fi
+  unzip -q "$T/g.zip" -d "$BASE"
+  rm -rf "$T"
+fi
+exec "$D/bin/gradle" "$@"
